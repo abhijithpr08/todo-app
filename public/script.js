@@ -22,6 +22,10 @@ function fetchTodos() {
 function addTodo() {
     const input = document.getElementById("taskInput");
     const task = input.value;
+    if(task===""){
+        alert("Add task");
+        return
+    }
 
     fetch("/api/todos", {
         method: "POST",
