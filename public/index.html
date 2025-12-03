@@ -4,17 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="/public/todo.css">
+    <link rel="stylesheet" href="./todo.css">
 </head>
 <body>
-    <div class="inputs">
-        <input type="text" id="taskName" placeholder="Enter task name">
-        <button id="add">Add task</button>
-    </div>
-    <div id="display">
+    <h1>TODO APP</h1>
 
-    </div>
+<input type="text" id="taskInput" placeholder="Enter new task">
+<button onclick="addTodo()">ADD TODO</button>
 
-    <script src="./script.js"></script>
+<ul id="todoList"></ul>
+
+<script src="script.js"></script>
 </body>
 </html>

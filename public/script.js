@@ -1,11 +1,42 @@
-const addBtn = document.getElementById("add");
-const inputValue = document.getElementById("taskName");
+const list = document.getElementById("todoList");
 
-addBtn.addEventListener("click",()=>{
-    let value = inputValue.value.trim();
-    if(value === ""){
-        alert("please enter task name")
-        return;
-    }
-    console.log(value)
-})
+fetchTodos();
+
+function fetchTodos() {
+    fetch("/api/todos")
+    .then(res => res.json())
+    .then(data => {
+        list.innerHTML = "";
+
+        data.forEach(todo => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+                ${todo.task}
+                <button onclick="deleteTodo(${todo.id})">Delete</button>
+            `;
+            list.appendChild(li);
+        });
+    });
+}
+
+function addTodo() {
+    const input = document.getElementById("taskInput");
+    const task = input.value;
+
+    fetch("/api/todos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task })
+    })
+    .then(() => {
+        input.value = "";
+        fetchTodos();
+    });
+}
+
+function deleteTodo(id) {
+    fetch("/api/todos/" + id, {
+        method: "DELETE"
+    })
+    .then(() => fetchTodos());
+}
