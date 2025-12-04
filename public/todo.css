@@ -26,9 +26,13 @@ ul {
 
 li {
     background: white;
-    margin: 10px auto;
-    width: 300px;
+    margin: auto;
+    width: 500px;
     padding: 10px;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
+}
+
+.taskname {
+    width: 100px;
 }

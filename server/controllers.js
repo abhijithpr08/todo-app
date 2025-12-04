@@ -62,8 +62,38 @@ function deleteTodo(req, res, id) {
     res.end("Deleted");
 }
 
+function updateTodo(req, res, id) {
+
+    let body = "";
+
+    req.on("data", chunk => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+
+        const data = JSON.parse(body);
+
+        let todos = readTodos();
+
+        todos = todos.map(todo => {
+            if (todo.id == id) {
+                todo.status = data.status;
+            }
+            return todo;
+        });
+
+        saveTodos(todos);
+
+        res.writeHead(200);
+        res.end("Updated");
+    });
+}
+
+
 module.exports = {
     getTodos,
     addTodo,
-    deleteTodo
+    deleteTodo,
+    updateTodo
 };
