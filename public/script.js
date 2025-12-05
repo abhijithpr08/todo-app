@@ -6,6 +6,7 @@ function fetchTodos() {
     fetch("/api/todos")
         .then(res => res.json())
         .then(data => {
+
             list.innerHTML = "";
 
             data.forEach(todo => {
@@ -17,35 +18,31 @@ function fetchTodos() {
                 li.innerHTML = `
         <div class="check">
             <input type="checkbox"
-                   ${isCompleted ? "checked" : ""}
-                   onchange="updateTodo(${todo.id}, this.checked)">
+                ${isCompleted ? "checked" : ""}
+                onchange="updateTodo('${todo._id}', this.checked)">
         </div>
 
-        <div class="taskname">
+        <div class="taskname" style="text-decoration:${isCompleted ? "line-through" : "none"}">
             ${todo.task}
         </div>
 
-        <button onclick="deleteTodo(${todo.id})">Delete</button>
+        <button onclick="deleteTodo('${todo._id}')">Delete</button>
     `;
-
-                if (isCompleted) {
-                    li.querySelector(".taskname").style.textDecoration = "line-through";
-                    li.querySelector(".taskname").style.color = "gray";
-                }
 
                 list.appendChild(li);
             });
-
-
         });
 }
 
 function addTodo() {
+
     const input = document.getElementById("taskInput");
-    const task = input.value;
-    if (task === "") {
-        alert("Add task");
-        return
+
+    const task = input.value.trim();
+
+    if (!task) {
+        alert("Enter task!");
+        return;
     }
 
     fetch("/api/todos", {
@@ -53,17 +50,17 @@ function addTodo() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ task })
     })
-        .then(() => {
-            input.value = "";
-            fetchTodos();
-        });
+    .then(() => {
+        input.value = "";
+        fetchTodos();
+    });
 }
 
 function deleteTodo(id) {
     fetch("/api/todos/" + id, {
         method: "DELETE"
     })
-        .then(() => fetchTodos());
+    .then(fetchTodos);
 }
 
 function updateTodo(id, isCompleted) {
@@ -75,5 +72,5 @@ function updateTodo(id, isCompleted) {
             status: isCompleted ? "completed" : "pending"
         })
     })
-        .then(() => fetchTodos());
+    .then(fetchTodos);
 }

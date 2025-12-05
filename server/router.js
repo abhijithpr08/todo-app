@@ -36,6 +36,7 @@ module.exports = (req, res) => {
         const id = req.url.split("/")[3];
         return updateTodo(req, res, id);
     }
+
     res.writeHead(404);
     res.end("404 Not Found");
 };

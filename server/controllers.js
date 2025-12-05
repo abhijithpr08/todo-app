@@ -1,28 +1,16 @@
-const fs = require("fs");
-const path = require("path");
+const Todo = require("./models/Todo");
 
-const filePath = path.join(__dirname, "storage.json");
+async function getTodos(req, res) {
+    try {
+        const todos = await Todo.find();
 
-function readTodos() {
-    if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, JSON.stringify([]));
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(todos));
+
+    } catch (err) {
+        res.writeHead(500);
+        res.end("DB Error");
     }
-
-    const data = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(data || "[]");
-}
-
-function saveTodos(todos) {
-    fs.writeFile(filePath, JSON.stringify(todos, null, 2), err => {
-        if (err) console.log("Write error:", err);
-    });
-}
-
-function getTodos(req, res) {
-    const todos = readTodos();
-
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(todos));
 }
 
 function addTodo(req, res) {
@@ -32,64 +20,64 @@ function addTodo(req, res) {
         body += chunk.toString();
     });
 
-    req.on("end", () => {
-        const data = JSON.parse(body);
+    req.on("end", async () => {
+        try {
+            const data = JSON.parse(body);
 
-        const todos = readTodos();
+            const newTodo = new Todo({
+                task: data.task
+            });
 
-        const newTodo = {
-            id: Date.now(),
-            task: data.task
-        };
+            await newTodo.save();
 
-        todos.push(newTodo);
+            res.writeHead(201, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(newTodo));
 
-        saveTodos(todos);
-
-        res.writeHead(201, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(newTodo));
+        } catch (err) {
+            console.log(err);
+            res.writeHead(500);
+            res.end("Add error");
+        }
     });
 }
 
-function deleteTodo(req, res, id) {
-    let todos = readTodos();
+async function deleteTodo(req, res, id) {
+    try {
+        await Todo.findByIdAndDelete(id);
+        res.writeHead(200);
+        res.end("Deleted");
 
-    todos = todos.filter(todo => todo.id != id);
-
-    saveTodos(todos);
-
-    res.writeHead(200);
-    res.end("Deleted");
+    } catch {
+        res.writeHead(500);
+        res.end("Delete error");
+    }
 }
 
 function updateTodo(req, res, id) {
-
     let body = "";
 
     req.on("data", chunk => {
         body += chunk.toString();
     });
 
-    req.on("end", () => {
+    req.on("end", async () => {
+        try {
 
-        const data = JSON.parse(body);
+            const data = JSON.parse(body);
 
-        let todos = readTodos();
+            await Todo.findByIdAndUpdate(id, {
+                status: data.status
+            });
 
-        todos = todos.map(todo => {
-            if (todo.id == id) {
-                todo.status = data.status;
-            }
-            return todo;
-        });
+            res.writeHead(200);
+            res.end("Updated");
 
-        saveTodos(todos);
-
-        res.writeHead(200);
-        res.end("Updated");
+        } catch {
+            res.writeHead(500);
+            res.end("Update error");
+        }
     });
 }
-
 
 module.exports = {
     getTodos,
